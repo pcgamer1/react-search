@@ -1,26 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react"
+import { Table, Input } from "antd"
+import axios from "axios"
+import { userColumns } from "./columns"
+import { useTableSearch } from "./useTableSearch"
+import "antd/dist/antd.css"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const { Search } = Input
+
+const fetchUsers = async () => {
+  const { data } = await axios.get(
+    "https://jsonplaceholder.typicode.com/users/"
+  )
+  return { data }
 }
 
-export default App;
+export default function App() {
+  const [searchVal, setSearchVal] = useState(null)
+
+  const { filteredData, loading } = useTableSearch({
+    searchVal,
+    retrieve: fetchUsers,
+  })
+
+  return (
+    <>
+      <Search
+        onChange={(e) => setSearchVal(e.target.value)}
+        placeholder='Search'
+        enterButton
+        style={{
+          position: "sticky",
+          top: "0",
+          left: "0",
+          width: "250px",
+          marginTop: "2vh",
+        }}
+      />
+      <br /> <br />
+      <Table
+        rowKey='name'
+        dataSource={filteredData}
+        columns={userColumns}
+        loading={loading}
+        pagination={false}
+      />
+    </>
+  )
+}
